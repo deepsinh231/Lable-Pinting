@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<link>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Discount Label Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+    :root {
+        --font-family: 'Poppins', sans-serif;
+        --primary-color: #4CAF50;
+        --primary-hover: #45a049;
+        --text-color: #333;
+        --border-color: #ccc;
+        --danger-color: #e53935;
+        --bg-color: #f8f8f8;
+        --white: #fff;
+
+        --font-sm: 14px;
+        --font-md: 18px;
+        --font-lg: 22px;
+        --font-xl: 24px;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--font-family);
+        padding: 20px;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    h2,
+    h3 {
+        font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    select {
+        font-family: var(--font-family);
+        padding: 8px 12px;
+        margin: 5px 5px 15px 0;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    button {
+        font-family: var(--font-family);
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 10px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+
+    button:hover {
+        background-color: var(--primary-hover);
+    }
+
+
+    .label .discount {
+        font-size: var(--font-xl);
+        font-weight: bold;
+        color: var(--danger-color);
+        text-align: center;
+    }
+
+    .label .product-name {
+        font-size: var(--font-lg);
+        font-weight: 600;
+        margin: 8px 0;
+        text-align: center;
+    }
+
+    .label .price-details {
+        font-size: var(--font-sm);
+        text-align: center;
+    }
+
+    .page {
+        /* width: 190mm; */
+        /* height: 277mm; */
+        /* margin: 5mm auto 10mm auto; */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 60mm);
+        /* Each row is exactly 60mm */
+        gap: 6mm;
+        page-break-after: always;
+        background: var(--white);
+        box-sizing: border-box;
+        padding: 0;
+        /* Remove padding to fit exactly */
+    }
+
+    .label {
+        width: 100%;
+        height: 100%;
+        background: var(--white);
+        border: 2px dashed #000;
+        box-sizing: border-box;
+        font-size: var(--font-sm);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 10px;
+    }
+
+    table {
+        margin-top: 20px;
+        border-collapse: collapse;
+        width: 100%;
+        background: var(--white);
+    }
+
+    th,
+    td {
+        border: 1px solid #aaa;
+        padding: 8px;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    #pdf-content {
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        margin-top: 20px;
+        background-color: var(--white);
+        display: block;
+        min-height: 100px;
+    }
+
+    input[type="file"] {
+        border: none;
+    }
+</style>
+
+</head>
+
+<body>
+
+    <h3>🔍 PDF Preview</h3>
+    <div id="pdf-content"></div>
+    <button onclick="generatePDF()">📄 Generate PDF</button>
+
+    <h2>Discount Label Generator</h2>
+
+    <input type="file" id="jsonFile" accept=".json" />
+    <br /><br />
+
+    <input type="text" id="name" placeholder="Product Name" />
+    <input type="number" id="mrp" placeholder="MRP" />
+    <input type="number" id="smp" placeholder="DMart Price" />
+    <input type="text" id="discount" placeholder="Discount Text (e.g., ₹250 OFF)" />
+    <button onclick="addEntry()">Add Entry</button>
+
+    <h3>🧾 Product List</h3>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>MRP</th>
+                <th>SMP</th>
+                <th>Discount</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+
+    <h2>🎨 Live Style Editor (Root Variables)</h2>
+
+    <label>Font Family:
+        <select id="font-family">
+            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Segoe UI', sans-serif">Segoe UI</option>
+        </select>
+    </label>
+
+    <label>Price Font:
+        <input type="number" id="font-sm" value="14">
+    </label>
+    <label>Medium Font:
+        <input type="number" id="font-md" value="18">
+    </label>
+    <label>Large Font:
+        <input type="number" id="font-lg" value="22">
+    </label>
+    <label>XL Font:
+        <input type="number" id="font-xl" value="24">
+    </label>
+
+    <label>Primary Color:
+        <input type="color" id="primary-color" value="#4CAF50">
+    </label>
+    <label>Danger Color:
+        <input type="color" id="danger-color" value="#e53935">
+    </label>
+
+    <button onclick="resetDefaults()">Reset to Default</button>
+
+
+
+    <script>
+        let data = [];
+
+        const vars = {
+            '--font-family': document.getElementById('font-family'),
+            '--font-sm': document.getElementById('font-sm'),
+            '--font-md': document.getElementById('font-md'),
+            '--font-lg': document.getElementById('font-lg'),
+            '--font-xl': document.getElementById('font-xl'),
+            '--primary-color': document.getElementById('primary-color'),
+            '--danger-color': document.getElementById('danger-color'),
+        };
+
+        function applyRootVars() {
+            for (let key in vars) {
+                let el = vars[key];
+                let val = el.value;
+                if (key.includes('font') && key !== '--font-family') val += 'px';
+                document.documentElement.style.setProperty(key, val);
+                localStorage.setItem(key, val);
+            }
+        }
+
+        function loadFromStorage() {
+            for (let key in vars) {
+                let val = localStorage.getItem(key);
+                if (val) {
+                    document.documentElement.style.setProperty(key, val);
+                    if (key.includes('font') && key !== '--font-family') {
+                        vars[key].value = parseInt(val);
+                    } else {
+                        vars[key].value = val;
+                    }
+                }
+            }
+        }
+
+        for (let key in vars) {
+            vars[key].addEventListener('input', applyRootVars);
+        }
+
+        function resetDefaults() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+        });
+
+        function addEntry() {
+            const name = document.getElementById("name").value.trim();
+            const MRP = parseFloat(document.getElementById("mrp").value);
+            const SMP = parseFloat(document.getElementById("smp").value);
+            const discount = document.getElementById("discount").value.trim();
+
+            if (!name || isNaN(MRP) || isNaN(SMP) || !discount) {
+                alert("❗ Please fill all fields correctly.");
+                return;
+            }
+
+            data.push({ name, MRP, SMP, discount });
+            renderTable();
+            renderPDFPreview();
+
+            document.getElementById("name").value = "";
+            document.getElementById("mrp").value = "";
+            document.getElementById("smp").value = "";
+            document.getElementById("discount").value = "";
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector("#data-table tbody");
+            tbody.innerHTML = "";
+
+            data.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+          <td>${item.name}</td>
+          <td>₹${item.MRP}</td>
+          <td>₹${item.SMP}</td>
+          <td>${item.discount}</td>
+          <td><button onclick="deleteEntry(${index})">❌</button></td>
+        `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function deleteEntry(index) {
+            data.splice(index, 1);
+            renderTable();
+            renderPDFPreview();
+        }
+
+
+        function renderPDFPreview() {
+            const container = document.getElementById("pdf-content");
+            container.innerHTML = "";
+
+            const labelsPerPage = 8; // 2 columns x 4 rows
+
+            for (let i = 0; i < data.length; i += labelsPerPage) {
+                const chunk = data.slice(i, i + labelsPerPage);
+                if (chunk.length === 0) continue;
+
+                const page = document.createElement("div");
+                page.className = "page";
+
+                chunk.forEach(item => {
+                    const box = document.createElement("div");
+                    box.className = "label";
+                    box.innerHTML = `
+                <div class="discount">${item.discount}</div>
+                <div class="product-name">${item.name}</div>
+                <div class="price-details">
+                    MRP ₹${item.MRP}<br>
+                    Price ₹${item.SMP}
+                </div>`;
+                    page.appendChild(box);
+                });
+
+                container.appendChild(page);
+            }
+        }
+
+        function generatePDF() {
+            if (data.length === 0) {
+                alert("⚠️ No data to generate PDF.");
+                return;
+            }
+
+            renderPDFPreview();
+
+            const container = document.getElementById("pdf-content");
+            if (!container || container.innerHTML.trim() === "") {
+                alert("❗ PDF content is empty!");
+                return;
+            }
+            const opt = {
+                margin: [10, 10, 10, 10], // top, left, bottom, right
+                filename: 'Discount_Labels.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 1, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(container).save();
+        }
+
+        document.getElementById('jsonFile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const content = JSON.parse(e.target.result);
+                    if (Array.isArray(content)) {
+                        data = content;
+                        renderTable();
+                        renderPDFPreview();
+                        alert("✅ JSON data loaded!");
+                    } else {
+                        alert("❌ Invalid JSON format.");
+                    }
+                } catch (err) {
+                    alert("❌ Error parsing JSON.");
+                }
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+
+</html>
