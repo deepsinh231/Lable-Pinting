@@ -9,9 +9,9 @@
 
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         :root {
@@ -77,9 +77,9 @@
         }
 
         .label .discount {
-            font-size: var(--font-xl);
+            font-size: 30px;
             font-weight: bold;
-            color: var(--danger-color);
+            /* color: var(--danger-color); */
             text-align: center;
         }
 
@@ -87,12 +87,18 @@
             font-size: var(--font-lg);
             font-weight: 600;
             margin: 8px 0;
+            line-height: 49px;
+
             text-align: center;
         }
 
         .label .price-details {
-            font-size: var(--font-sm);
+            font-size: 36px;
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
             text-align: center;
+            font-weight: 900;
         }
     </style>
 </head>
@@ -126,13 +132,53 @@
     <!-- Buttons -->
     <button onclick="addEntry()">➕ Add to List</button>
     <button onclick="generatePDF()">📄 Generate PDF</button>
-
-    <!-- Preview Area -->
     <div id="pdf-content" style="margin-top: 30px;"></div>
+
+    <h3>📋 Product List</h3>
+    <table id="productTable" border="1" cellpadding="10" cellspacing="0"
+        style="margin-top: 10px; width: 100%; text-align: left;">
+        <thead>
+            <tr style="background-color: #f0f0f0;">
+                <th>#</th>
+                <th>Product Name</th>
+                <th>MRP</th>
+                <th>SMP</th>
+                <th>Discount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <!-- Preview Area -->
 
     <script>
         let data = [];
 
+        function updateTable() {
+            const tableBody = document.querySelector("#productTable tbody");
+            tableBody.innerHTML = ""; // Clear existing rows
+
+            data.forEach((item, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.name}</td>
+            <td>₹${item.MRP}</td>
+            <td>₹${item.SMP}</td>
+            <td>${item.discount}</td>
+            <td><button onclick="deleteRow(${index})" style="background-color: var(--danger-color); color: white; border: none; padding: 5px 10px; border-radius: 4px;">🗑 Delete</button></td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function deleteRow(index) {
+            if (confirm("Are you sure you want to delete this entry?")) {
+                data.splice(index, 1); // Remove item from data array
+                updateTable(); // Refresh the table
+            }
+        }
         // Handle File Upload
         document.getElementById('jsonFile').addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -175,6 +221,7 @@
             });
 
             alert("✅ Product added to list!");
+            updateTable();
         }
 
         // Generate PDF
@@ -194,7 +241,7 @@
             <div class="discount">${item.discount}</div>
             <div class="product-name">${item.name}</div>
             <div class="price-details">
-              <span style="text-decoration: line-through;">₹${item.MRP}</span>
+              <span style="text-decoration: line-through;">MRP ₹${item.MRP}</span>
                 <span>SMP ₹${item.SMP}</span>
             </div>
           `;
