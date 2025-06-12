@@ -192,6 +192,7 @@
                     if (Array.isArray(content)) {
                         data = content;
                         alert("✅ JSON data loaded!");
+                        updateTable();
                     } else {
                         alert("❌ Invalid JSON structure.");
                     }
