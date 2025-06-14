@@ -21,6 +21,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import { jsPDF } from "jspdf";
+import "./LabelApp.css";
 
 const { Title, Text } = Typography;
 
@@ -82,49 +83,20 @@ export default function LabelGenerator() {
       for (let i = 0; i < products.length; i++) {
         const item = products[i];
 
-        // Draw border
-        doc.rect(x, y, labelWidth, labelHeight);
+        // --- Draw white rounded box with border (simulate shadow with thicker border) ---
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(1.5);
+        doc.roundedRect(x, y, labelWidth, labelHeight, 6, 6, 'FD');
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(x, y, labelWidth, labelHeight, 6, 6);
 
-        // Draw discount box (yellow background, border, rotated text)
-        // const discountBoxWidth = 14;
-        // const discountBoxHeight = labelHeight - 10;
-        // const discountBoxX = x - discountBoxWidth + 2;
-        // const discountBoxY = y + 5;
-        // Yellow background
-        // doc.setFillColor(255, 230, 0);
-        // doc.rect(discountBoxX, discountBoxY, discountBoxWidth, discountBoxHeight, 'F');
-        // // Border
-        // doc.setDrawColor(0, 0, 0);
-        // doc.rect(discountBoxX, discountBoxY, discountBoxWidth, discountBoxHeight);
-        // // --- Discount (vertical, auto-shrink) ---
-        // let discountFontSize = 12;
-        // doc.setFont('helvetica', 'bold');
-        // doc.setTextColor(0, 0, 0);
-        // let discountText = `${item.discount}`;
-        // // Shrink font if discount text is too long
-        // while (doc.getTextWidth(discountText) > discountBoxHeight - 8 && discountFontSize > 7) {
-        //   discountFontSize -= 1;
-        //   doc.setFontSize(discountFontSize);
-        // }
-        // Truncate with ellipsis if still too long
-        // if (doc.getTextWidth(discountText) > discountBoxHeight - 8) {
-        //   while (doc.getTextWidth(discountText + '...') > discountBoxHeight - 8 && discountText.length > 0) {
-        //     discountText = discountText.slice(0, -1);
-        //   }
-        //   discountText += '...';
-        // }
-        // doc.setFontSize(discountFontSize);
-        // doc.text(discountText, discountBoxX + discountBoxWidth / 2, discountBoxY + discountBoxHeight / 2 + 2, {
-        //   angle: 10,
-        //   align: 'center',
-        // });
-
-        // --- SMP line: 'Rs.' (16), SMP (30, bold), 'Only' (16), centered ---
+        // --- SMP line: 'Rs.' (16), SMP (30, bold, blue), 'Only' (16), centered ---
         const smpRsFontSize = 16;
         const smpValueFontSize = 30;
         const smpOnlyFontSize = 16;
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(30, 30, 30);
         const smpRs = 'Rs.';
         const smpValue = `${item.SMP}`;
         const smpOnly = 'Only';
@@ -136,31 +108,34 @@ export default function LabelGenerator() {
         doc.setFontSize(smpOnlyFontSize);
         const onlyWidth = doc.getTextWidth(smpOnly);
         const totalWidth = rsWidth + valueWidth + onlyWidth;
-        // Start x so the whole group is centered
         let smpStartX = x + (labelWidth - totalWidth) / 2;
-        const smpY = y + 18;
-        // Draw each part
+        const smpY = y + 15;
+        // Draw 'Rs.'
         doc.setFontSize(smpRsFontSize);
+        doc.setTextColor(34, 34, 34);
         doc.text(smpRs, smpStartX, smpY);
         smpStartX += rsWidth;
+        // Draw SMP value (blue, big)
         doc.setFontSize(smpValueFontSize);
+        doc.setTextColor(26, 35, 126);
         doc.text(smpValue, smpStartX, smpY);
         smpStartX += valueWidth;
+        // Draw 'Only'
         doc.setFontSize(smpOnlyFontSize);
+        doc.setTextColor(34, 34, 34);
         doc.text(smpOnly, smpStartX, smpY);
 
         // --- Name (bold, centered, wrap/shrink if needed) ---
         let nameFontSize = 18;
         doc.setFont('helvetica', 'bold');
+        doc.setTextColor(33, 33, 33);
         let nameText = item.name;
         let nameLines = doc.splitTextToSize(nameText, labelWidth - 20);
-        // Shrink font if still too wide
         while (nameLines.length > 2 && nameFontSize > 8) {
           nameFontSize -= 1;
           doc.setFontSize(nameFontSize);
           nameLines = doc.splitTextToSize(nameText, labelWidth - 20);
         }
-        // Truncate with ellipsis if still too long
         if (nameLines.length > 2) {
           let firstLine = nameLines[0];
           while (doc.getTextWidth(firstLine + '...') > labelWidth - 20 && firstLine.length > 0) {
@@ -172,19 +147,21 @@ export default function LabelGenerator() {
         doc.text(nameLines, x + labelWidth / 2, y + 28, { align: 'center' });
 
         // --- MRP (bold, centered, shrink if needed) ---
-        let mrpFontSize = 14;
+        let mrpFontSize = 15;
         doc.setFont('helvetica', 'bold');
+        doc.setTextColor(44, 44, 44);
         let mrpText = `MRP Rs. ${item.MRP} /-`;
         while (doc.getTextWidth(mrpText) > labelWidth - 20 && mrpFontSize > 8) {
           mrpFontSize -= 1;
           doc.setFontSize(mrpFontSize);
         }
         doc.setFontSize(mrpFontSize);
-        doc.text(mrpText, x + labelWidth / 2, y + 40, { align: 'center' });
+        doc.text(mrpText, x + labelWidth / 2, y + 43, { align: 'center' });
 
-        // --- Discount (bold, centered, shrink if needed, last line) ---
-        let discountFontSizeFinal = 14;
+        // --- Discount (bold, green, centered, last line) ---
+        let discountFontSizeFinal = 15;
         doc.setFont('helvetica', 'bold');
+        doc.setTextColor(56, 142, 60);
         let discountTextFinal = `Discount: ${item.discount}`;
         while (doc.getTextWidth(discountTextFinal) > labelWidth - 20 && discountFontSizeFinal > 8) {
           discountFontSizeFinal -= 1;
@@ -238,17 +215,22 @@ export default function LabelGenerator() {
     <div className="p-6 font-sans max-w-6xl mx-auto">
       <Title level={2}>🧾 Label Generator</Title>
 
-      {/* Show first product's price if available */}
+      {/* Preview Card for First Product */}
       {products.length > 0 && (
-        <div style={{ marginBottom: 24, textAlign: 'center' }}>
-          <Text strong style={{ fontSize: 32 }}>
-            ₹ {products[0].SMP}
-          </Text>
+        <div className="label-preview-card">
+          <div className="label-preview-smp">
+            <span className="label-preview-smp-rs">Rs.</span>
+            <span className="label-preview-smp-value">{products[0].SMP}</span>
+            <span className="label-preview-smp-only">Only</span>
+          </div>
+          <div className="label-preview-name">{products[0].name}</div>
+          <div className="label-preview-mrp">MRP Rs. {products[0].MRP} /-</div>
+          <div className="label-preview-discount">Discount: {products[0].discount}</div>
         </div>
       )}
 
       <Upload beforeUpload={() => false} onChange={handleFileUpload} accept=".json">
-        <Button icon={<UploadOutlined />}>Upload JSON File</Button>
+        <Button icon={<UploadOutlined />} className="animated-btn">Upload JSON File</Button>
       </Upload>
 
       <Form
@@ -270,7 +252,7 @@ export default function LabelGenerator() {
           <Input />
         </Form.Item>
         <Form.Item>
-          <Button icon={<PlusOutlined />} type="primary" htmlType="submit">
+          <Button icon={<PlusOutlined />} type="primary" htmlType="submit" className="animated-btn">
             Add to List
           </Button>
         </Form.Item>
@@ -284,6 +266,7 @@ export default function LabelGenerator() {
             {products.map((item) => (
               <Col span={12} md={8} lg={6} key={item.key}>
                 <Card
+                  className="product-card-animated"
                   title={<Text strong>{item.name}</Text>}
                   actions={[
                     <EditOutlined key="edit" onClick={() => openEditModal(item)} />,
@@ -299,7 +282,7 @@ export default function LabelGenerator() {
             ))}
           </Row>
 
-          <Button type="primary" icon={<FilePdfOutlined />} onClick={generatePDF} className="mt-6" size="large">
+          <Button type="primary" icon={<FilePdfOutlined />} onClick={generatePDF} className="mt-6 animated-btn" size="large">
             Generate PDF
           </Button>
         </>

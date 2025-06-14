@@ -1,0 +1,111 @@
+/* LabelApp.css */
+
+.label-preview-card {
+  max-width: 350px;
+  margin: 32px auto 24px auto;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px 0 rgba(0,0,0,0.13), 0 1.5px 6px 0 rgba(0,0,0,0.07);
+  background: #fff;
+  padding: 32px 24px 24px 24px;
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s;
+  border: 1.5px solid #f0f0f0;
+  animation: fadeIn 0.7s;
+}
+.label-preview-card:hover {
+  box-shadow: 0 12px 40px 0 rgba(0,0,0,0.18), 0 3px 12px 0 rgba(0,0,0,0.10);
+  transform: scale(1.03);
+}
+.label-preview-smp {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 10px;
+  gap: 6px;
+}
+.label-preview-smp-rs {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin-right: 2px;
+}
+.label-preview-smp-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: #1a237e;
+  margin-right: 2px;
+  letter-spacing: 1px;
+}
+.label-preview-smp-only {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+}
+.label-preview-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.label-preview-mrp {
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.label-preview-discount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #388e3c;
+  text-align: center;
+  margin-bottom: 0;
+}
+.animated-btn {
+  background: linear-gradient(90deg, #1a237e 0%, #3949ab 100%);
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px 0 rgba(26,35,126,0.13);
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  border: none;
+}
+.animated-btn:hover, .animated-btn:focus {
+  background: linear-gradient(90deg, #3949ab 0%, #1a237e 100%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 24px 0 rgba(26,35,126,0.18);
+}
+.product-card-animated {
+  border-radius: 14px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.09);
+  transition: box-shadow 0.3s, transform 0.3s;
+  border: 1.5px solid #f0f0f0;
+  animation: fadeInUp 0.7s;
+}
+.product-card-animated:hover {
+  box-shadow: 0 8px 32px 0 rgba(26,35,126,0.13);
+  transform: scale(1.03);
+  border-color: #3949ab;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 600px) {
+  .label-preview-card {
+    padding: 18px 6px 18px 6px;
+    max-width: 98vw;
+  }
+  .label-preview-name {
+    font-size: 16px;
+  }
+  .label-preview-smp-value {
+    font-size: 24px;
+  }
+} 
