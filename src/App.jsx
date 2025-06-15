@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Input,
@@ -19,6 +19,7 @@ import {
   PlusOutlined,
   FilePdfOutlined,
   EditOutlined,
+  DeleteFilled,
 } from "@ant-design/icons";
 import { jsPDF } from "jspdf";
 import "./LabelApp.css";
@@ -31,15 +32,42 @@ export default function LabelGenerator() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [editForm] = Form.useForm();
+  const [deleteAllModalVisible, setDeleteAllModalVisible] = useState(false);
+
+  useEffect(() => {
+    const savedProducts = localStorage.getItem('products');
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      localStorage.setItem('products', JSON.stringify(products));
+    }
+  }, [products]);
 
   const addEntry = (values) => {
-    setProducts((prev) => [...prev, { ...values, key: `${Date.now()}-${prev.length}` }]);
+    const newProduct = { ...values, key: `${Date.now()}-${products.length}` };
+    const updatedProducts = [...products, newProduct];
+    setProducts(updatedProducts);
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
     message.success("✅ Product added to list!");
     form.resetFields();
   };
 
   const deleteRow = (key) => {
-    setProducts((prev) => prev.filter((item) => item.key !== key));
+    const updatedProducts = products.filter((item) => item.key !== key);
+    setProducts(updatedProducts);
+    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    message.success("✅ Product deleted!");
+  };
+
+  const handleDeleteAll = () => {
+    setProducts([]);
+    localStorage.removeItem('products');
+    setDeleteAllModalVisible(false);
+    message.success("✅ All products deleted!");
   };
 
   const handleFileUpload = (info) => {
@@ -126,7 +154,7 @@ export default function LabelGenerator() {
         doc.text(smpOnly, smpStartX, smpY);
 
         // --- Name (bold, centered, wrap/shrink if needed) ---
-        let nameFontSize = 18;
+        let nameFontSize = 22;
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(33, 33, 33);
         let nameText = item.name;
@@ -144,10 +172,11 @@ export default function LabelGenerator() {
           nameLines = [firstLine + '...', ''];
         }
         doc.setFontSize(nameFontSize);
+        doc.setFont('helvetica', 'bold');
         doc.text(nameLines, x + labelWidth / 2, y + 28, { align: 'center' });
 
         // --- MRP (bold, centered, shrink if needed) ---
-        let mrpFontSize = 15;
+        let mrpFontSize = 18;
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(44, 44, 44);
         let mrpText = `MRP Rs. ${item.MRP} /-`;
@@ -156,10 +185,20 @@ export default function LabelGenerator() {
           doc.setFontSize(mrpFontSize);
         }
         doc.setFontSize(mrpFontSize);
-        doc.text(mrpText, x + labelWidth / 2, y + 43, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+
+        // Draw red line above MRP
+        doc.setDrawColor(255, 0, 0); // Red color
+        doc.setLineWidth(1.5); // Increased line thickness
+        const lineY = y + 45; // Position the line above MRP text
+        doc.line(x + 10, lineY, x + labelWidth - 10, lineY);
+
+        // Reset color for MRP text
+        doc.setTextColor(44, 44, 44);
+        doc.text(mrpText, x + labelWidth / 2, y + 47, { align: 'center' });
 
         // --- Discount (bold, green, centered, last line) ---
-        let discountFontSizeFinal = 15;
+        let discountFontSizeFinal = 18;
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(56, 142, 60);
         let discountTextFinal = `Discount: ${item.discount}`;
@@ -168,7 +207,8 @@ export default function LabelGenerator() {
           doc.setFontSize(discountFontSizeFinal);
         }
         doc.setFontSize(discountFontSizeFinal);
-        doc.text(discountTextFinal, x + labelWidth / 2, y + 50, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        doc.text(discountTextFinal, x + labelWidth / 2, y + 56, { align: 'center' });
 
         count++;
         if (count % 2 === 0) {
@@ -203,9 +243,11 @@ export default function LabelGenerator() {
 
   const handleEditSubmit = () => {
     editForm.validateFields().then((values) => {
-      setProducts((prev) =>
-        prev.map((item) => (item.key === currentProduct.key ? { ...values, key: item.key } : item))
+      const updatedProducts = products.map((item) =>
+        item.key === currentProduct.key ? { ...values, key: item.key } : item
       );
+      setProducts(updatedProducts);
+      localStorage.setItem('products', JSON.stringify(updatedProducts));
       setEditModalVisible(false);
       message.success("✅ Product updated!");
     });
@@ -229,9 +271,29 @@ export default function LabelGenerator() {
         </div>
       )}
 
-      <Upload beforeUpload={() => false} onChange={handleFileUpload} accept=".json">
-        <Button icon={<UploadOutlined />} className="animated-btn">Upload JSON File</Button>
-      </Upload>
+      <div className="flex gap-4 mb-4">
+        <Upload beforeUpload={() => false} onChange={handleFileUpload} accept=".json">
+          <Button
+            icon={<UploadOutlined />}
+            className="custom-btn primary-btn"
+            size="large"
+          >
+            Upload JSON File
+          </Button>
+        </Upload>
+
+        {products.length > 0 && (
+          <Button
+            danger
+            icon={<DeleteFilled />}
+            onClick={() => setDeleteAllModalVisible(true)}
+            className="custom-btn danger-btn"
+            size="large"
+          >
+            Delete All Products
+          </Button>
+        )}
+      </div>
 
       <Form
         form={form}
@@ -252,7 +314,13 @@ export default function LabelGenerator() {
           <Input />
         </Form.Item>
         <Form.Item>
-          <Button icon={<PlusOutlined />} type="primary" htmlType="submit" className="animated-btn">
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            htmlType="submit"
+            className="custom-btn primary-btn"
+            size="large"
+          >
             Add to List
           </Button>
         </Form.Item>
@@ -269,10 +337,20 @@ export default function LabelGenerator() {
                   className="product-card-animated"
                   title={<Text strong>{item.name}</Text>}
                   actions={[
-                    <EditOutlined key="edit" onClick={() => openEditModal(item)} />,
-                    <DeleteOutlined key="delete" onClick={() => deleteRow(item.key)} />
+                    <Button
+                      key="edit"
+                      icon={<EditOutlined />}
+                      onClick={() => openEditModal(item)}
+                      className="custom-btn icon-btn"
+                    />,
+                    <Button
+                      key="delete"
+                      icon={<DeleteOutlined />}
+                      onClick={() => deleteRow(item.key)}
+                      className="custom-btn icon-btn danger-btn"
+                    />
                   ]}
-                  bordered
+                  variant="outlined"
                 >
                   <p><Text type="secondary">MRP:</Text> ₹{item.MRP}</p>
                   <p><Text type="secondary">SMP:</Text> ₹{item.SMP}</p>
@@ -282,7 +360,13 @@ export default function LabelGenerator() {
             ))}
           </Row>
 
-          <Button type="primary" icon={<FilePdfOutlined />} onClick={generatePDF} className="mt-6 animated-btn" size="large">
+          <Button
+            type="primary"
+            icon={<FilePdfOutlined />}
+            onClick={generatePDF}
+            className="custom-btn primary-btn mt-6"
+            size="large"
+          >
             Generate PDF
           </Button>
         </>
@@ -293,6 +377,8 @@ export default function LabelGenerator() {
         onCancel={() => setEditModalVisible(false)}
         onOk={handleEditSubmit}
         title="Edit Product"
+        okButtonProps={{ className: 'custom-btn primary-btn' }}
+        cancelButtonProps={{ className: 'custom-btn' }}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item label="Product Name" name="name" rules={[{ required: true }]}>
@@ -308,6 +394,22 @@ export default function LabelGenerator() {
             <Input />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Delete All Products"
+        open={deleteAllModalVisible}
+        onOk={handleDeleteAll}
+        onCancel={() => setDeleteAllModalVisible(false)}
+        okText="Yes, Delete All"
+        cancelText="Cancel"
+        okButtonProps={{
+          danger: true,
+          className: 'custom-btn danger-btn'
+        }}
+        cancelButtonProps={{ className: 'custom-btn' }}
+      >
+        <p>Are you sure you want to delete all products? This action cannot be undone.</p>
       </Modal>
     </div>
   );

@@ -108,4 +108,117 @@
   .label-preview-smp-value {
     font-size: 24px;
   }
+}
+
+.custom-btn {
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.custom-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.primary-btn {
+  background: linear-gradient(45deg, #1890ff, #096dd9);
+  border: none;
+  color: white;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(45deg, #40a9ff, #1890ff);
+  color: white;
+}
+
+.danger-btn {
+  background: linear-gradient(45deg, #ff4d4f, #cf1322) !important;
+  border: none;
+  color: white;
+}
+
+.danger-btn:hover {
+  background: linear-gradient(45deg, #ff7875, #ff4d4f);
+  color: white;
+}
+
+.icon-btn {
+  padding: 4px 8px;
+  min-width: 32px;
+  height: 32px;
+}
+
+.icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Product card animations */
+.product-card-animated {
+  transition: all 0.3s ease;
+}
+
+.product-card-animated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Label preview card styles */
+.label-preview-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.label-preview-smp {
+  margin-bottom: 12px;
+}
+
+.label-preview-smp-rs {
+  font-size: 16px;
+  color: #333;
+}
+
+.label-preview-smp-value {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1a237e;
+  margin: 0 4px;
+}
+
+.label-preview-smp-only {
+  font-size: 16px;
+  color: #333;
+}
+
+.label-preview-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.label-preview-mrp {
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+.label-preview-discount {
+  font-size: 15px;
+  color: #388e3c;
+  font-weight: bold;
 } 
